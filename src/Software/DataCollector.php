@@ -2,26 +2,30 @@
 
 namespace App\Software;
 
-use Psr\Log\LoggerInterface;
 use League\Csv\Reader;
+use Psr\Log\LoggerInterface;
 
 class DataCollector
 {
     public const CUSTOMERS = 'customers';
     public const PURCHASES = 'purchases';
+    /**
+     * @var array
+     */
     protected $mapping_civil = [
-        1 => "mme",
-        2 => "m"
-
+        1 => 'mme',
+        2 => 'm',
     ];
 
     /**
      * @var \Psr\Log\LoggerInterface
      */
     private $logger;
-
-    private $path_files;
-
+    /**
+     * Undocumented variable.
+     *
+     * @var array
+     */
     private $files;
 
     public function __construct(
@@ -36,24 +40,28 @@ class DataCollector
         $this->logger->warning('All Data parsed');
     }
 
-    public function addFile(string $file) : self
+    public function addFile(string $file): self
     {
         $this->files[] = $file;
 
         return $this;
     }
 
-    public function getFiles() : array
+    public function getFiles(): array
     {
         return $this->files;
     }
 
-    public function collectDataCsv() : array
+    /**
+     * Return customers with purchases.
+     *
+     * @return array
+     */
+    public function collectDataCsv(): array
     {
         if (count($this->getFiles()) === 0) {
-            return false;
+            return [];
         }
-        $results = [];
         $pre_data = [];
         foreach ($this->getFiles() as $file) {
             $type = $this->getTypeOfData($file);
@@ -75,9 +83,18 @@ class DataCollector
             }
         }
         $results = $this->mergeDataCollector($pre_data);
+
         return $results;
     }
-    public function mergeDataCollector(array $data) : array
+
+    /**
+     * Construit le format attendu en ajoutant purchase dans chaque client.
+     *
+     * @param array $data
+     *
+     * @return array
+     */
+    public function mergeDataCollector(array $data): array
     {
         $data_customer = [];
         foreach ($data[self::CUSTOMERS] as $key => $customer) {
@@ -87,9 +104,16 @@ class DataCollector
             $data_customer[] = $customer;
         }
         $this->logger->debug(json_encode($data_customer));
+
         return $data_customer;
     }
-    public function getDataCustomer(array $data) : array
+
+    /**
+     * @param array $data
+     *
+     * @return array
+     */
+    public function getDataCustomer(array $data): array
     {
         $val = [];
         array_shift($data); //Pour enlever la première ligne entete !
@@ -107,22 +131,36 @@ class DataCollector
 
         return $val;
     }
-    public function getDataPurchase(array $data) : array
+
+    /**
+     * @param array $data
+     *
+     * @return array
+     */
+    public function getDataPurchase(array $data): array
     {
         $val = [];
         array_shift($data); //Pour enlever la première ligne entete !
         foreach ($data as $value) {
             $val[$value[1]][] = [
                 'product_id' => $value[2],
-                'price' => (int)$value[4],
+                'price' => (int) $value[4],
                 'currency' => $value[5],
-                'quantity' => (int)$value[3],
+                'quantity' => (int) $value[3],
                 'purchased_at' => $value[6],
             ];
         }
+
         return $val;
     }
 
+    /**
+     * A partir du nom du fichier, renvoyer le type a savoir si c'est customer ou purchase.
+     *
+     * @param [type] $filename
+     *
+     * @return string
+     */
     protected function getTypeOfData($filename)
     {
         if (strpos($filename, self::CUSTOMERS) !== false) {

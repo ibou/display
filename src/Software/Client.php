@@ -7,8 +7,6 @@ use GuzzleHttp\Client as GuzzleClient;
 class Client
 {
     /**
-     * Undocumented variable.
-     *
      * @var GuzzleClient
      */
     private $guzzle;
@@ -21,6 +19,11 @@ class Client
         $this->guzzle = $guzzle;
     }
 
+    /**
+     * Get Json.
+     *
+     * @param string $url
+     */
     public function get(string $url)
     {
         return $this->guzzle->get(
@@ -28,6 +31,12 @@ class Client
         );
     }
 
+    /**
+     * Put Json data.
+     *
+     * @param string $url
+     * @param array  $data
+     */
     public function put($url, $data)
     {
         return $this->guzzle->put(
