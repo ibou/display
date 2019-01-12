@@ -11,7 +11,7 @@ Install
     or 
     $ git clone https://github.com/ibou/display.git 
 
-    $ cd to/projet
+    $ cd display
     $ composer install  
     $ php bin/console app:import:data
  
