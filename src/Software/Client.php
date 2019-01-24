@@ -27,7 +27,13 @@ class Client
     public function get(string $url)
     {
         return $this->guzzle->get(
-            $url
+            $url,
+            [
+                'headers' => [
+                    'data-Type' => 'json',
+                    'Content-Type' => 'application/json',
+                ],
+            ]
         );
     }
 
